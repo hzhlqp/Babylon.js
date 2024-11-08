@@ -1,0 +1,1 @@
+{"version":3,"file":"iSelectedLineContainer.js","sourceRoot":"","sources":["../../src/lines/iSelectedLineContainer.ts"],"names":[],"mappings":"","sourcesContent":["export interface ISelectedLineContainer {\r\n    selectedLineContainerTitles: Array<string>;\r\n    selectedLineContainerTitlesNoFocus: Array<string>;\r\n}\r\n"]}

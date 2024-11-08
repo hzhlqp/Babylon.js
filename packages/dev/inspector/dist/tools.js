@@ -1,0 +1,58 @@
+export class Tools {
+    static LookForItem(item, selectedEntity) {
+        if (item === selectedEntity) {
+            return true;
+        }
+        const children = item.getChildren ? item.getChildren() : item.children;
+        if (children && item.getClassName() !== "MultiMaterial") {
+            for (const child of children) {
+                if (Tools.LookForItem(child, selectedEntity)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    static _RecursiveRemoveHiddenMeshesAndHoistChildren(items) {
+        const result = [];
+        for (const i of items) {
+            // If the mesh is hidden, add it's children that are not hidden, this will handle the case of bounding box parenting for bounding box gizmo
+            if (i.reservedDataStore && i.reservedDataStore.hidden && i.getChildMeshes) {
+                Tools._RecursiveRemoveHiddenMeshesAndHoistChildren(i.getChildMeshes()).forEach((m) => {
+                    result.push(m);
+                });
+            }
+            else if (!i.reservedDataStore || !i.reservedDataStore.hidden) {
+                result.push(i);
+            }
+        }
+        return result;
+    }
+    static GetNameString(obj) {
+        if (obj?.name?.toString) {
+            return obj.name.toString();
+        }
+        return "";
+    }
+    static SortAndFilter(parent, items) {
+        if (!items) {
+            return [];
+        }
+        const finalArray = Tools._RecursiveRemoveHiddenMeshesAndHoistChildren(items);
+        if (parent && parent.reservedDataStore && parent.reservedDataStore.detachedChildren) {
+            finalArray.push(...parent.reservedDataStore.detachedChildren);
+        }
+        return finalArray.sort((a, b) => {
+            const lowerCaseA = Tools.GetNameString(a).toLowerCase();
+            const lowerCaseB = Tools.GetNameString(b).toLowerCase();
+            if (lowerCaseA === lowerCaseB) {
+                return 0;
+            }
+            if (lowerCaseA > lowerCaseB) {
+                return 1;
+            }
+            return -1;
+        });
+    }
+}
+//# sourceMappingURL=tools.js.map

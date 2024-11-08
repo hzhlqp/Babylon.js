@@ -1,0 +1,33 @@
+import { Observable } from "core/Misc/observable";
+import type { FrameNodePort } from "./frameNodePort";
+import type { NodePort } from "./nodePort";
+import type { GraphNode } from "./graphNode";
+import type { GraphCanvasComponent } from "./graphCanvas";
+export declare class NodeLink {
+    private _graphCanvas;
+    private _portA;
+    private _portB?;
+    private _nodeA;
+    private _nodeB?;
+    private _path;
+    private _selectionPath;
+    private _onSelectionChangedObserver;
+    private _isVisible;
+    private _isTargetCandidate;
+    onDisposedObservable: Observable<NodeLink>;
+    get isTargetCandidate(): boolean;
+    set isTargetCandidate(value: boolean);
+    get isVisible(): boolean;
+    set isVisible(value: boolean);
+    get portA(): FrameNodePort | NodePort;
+    get portB(): FrameNodePort | NodePort | undefined;
+    get nodeA(): GraphNode;
+    get nodeB(): GraphNode | undefined;
+    intersectsWith(rect: DOMRect): boolean;
+    update(endX?: number, endY?: number, straight?: boolean): void;
+    get path(): SVGPathElement;
+    get selectionPath(): SVGPathElement;
+    constructor(graphCanvas: GraphCanvasComponent, portA: NodePort, nodeA: GraphNode, portB?: NodePort, nodeB?: GraphNode);
+    onClick(evt: MouseEvent): void;
+    dispose(notify?: boolean): void;
+}

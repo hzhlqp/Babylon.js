@@ -2,7 +2,7 @@
 import type { ArcRotateCamera, Nullable, Observable } from "core/index";
 
 import type { PropertyValues } from "lit";
-import type { ToneMapping, ViewerDetails, ViewerHotSpot, ViewerHotSpotQuery } from "./viewer";
+import type { ViewerDetails, ViewerHotSpot, ViewerHotSpotQuery } from "./viewer";
 import type { CanvasViewerOptions } from "./viewerFactory";
 
 import { LitElement, css, defaultConverter, html } from "lit";
@@ -11,7 +11,6 @@ import { customElement, property, query, state } from "lit/decorators.js";
 import { Color4 } from "core/Maths/math.color";
 import { AsyncLock } from "core/Misc/asyncLock";
 import { Logger } from "core/Misc/logger";
-import { isToneMapping } from "./viewer";
 import { createViewerForCanvas, getDefaultEngine } from "./viewerFactory";
 
 // Icon SVG is pulled from https://fluentuipr.z22.web.core.windows.net/heads/master/public-docsite-v9/storybook/iframe.html?id=icons-catalog--page&viewMode=story
@@ -49,7 +48,6 @@ interface HTML3DElementEventMap extends HTMLElementEventMap {
     environmenterror: ErrorEvent;
     modelchange: Event;
     modelerror: ErrorEvent;
-    loadingprogresschange: Event;
     selectedanimationchange: Event;
     animationspeedchange: Event;
     animationplayingchange: Event;
@@ -77,34 +75,6 @@ export class HTML3DElement extends LitElement {
             (details) => details.viewer.onSkyboxBlurChanged,
             (details) => (details.viewer.skyboxBlur = this.skyboxBlur ?? details.viewer.skyboxBlur),
             (details) => (this.skyboxBlur = details.viewer.skyboxBlur)
-        ),
-        this._createPropertyBinding(
-            "toneMapping",
-            (details) => details.viewer.onToneMappingChanged,
-            (details) => {
-                if (this.toneMapping) {
-                    details.viewer.toneMapping = this.toneMapping;
-                }
-            },
-            (details) => {
-                if (details.viewer.toneMapping === "unknown") {
-                    this.toneMapping = null;
-                } else {
-                    this.toneMapping = details.viewer.toneMapping;
-                }
-            }
-        ),
-        this._createPropertyBinding(
-            "contrast",
-            (details) => details.viewer.onContrastChanged,
-            (details) => (details.viewer.contrast = this.contrast ?? details.viewer.contrast),
-            (details) => (this.contrast = details.viewer.contrast)
-        ),
-        this._createPropertyBinding(
-            "exposure",
-            (details) => details.viewer.onExposureChanged,
-            (details) => (details.viewer.exposure = this.exposure ?? details.viewer.exposure),
-            (details) => (this.exposure = details.viewer.exposure)
         ),
         this._createPropertyBinding(
             "cameraAutoOrbit",
@@ -160,10 +130,6 @@ export class HTML3DElement extends LitElement {
             height: 100%;
         }
 
-        .canvas {
-            outline: none;
-        }
-
         .children-slot {
             position: absolute;
             top: 0;
@@ -171,76 +137,20 @@ export class HTML3DElement extends LitElement {
             pointer-events: none;
         }
 
-        .bar {
-            position: absolute;
-            width: calc(100% - 24px);
-            min-width: 150px;
-            max-width: 1280px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--ui-background-color);
-        }
-
-        .loading-progress-outer {
-            height: 4px;
-            border-radius: 2px;
-            border: none;
-            outline: none;
-            top: 12px;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-        }
-
-        .loading-progress-outer-inactive {
-            opacity: 0;
-            /* Set the background color to the foreground color while in the inactive state so that the color seen is correct while fading out the opacity. */
-            background-color: var(--ui-foreground-color);
-        }
-
-        .loading-progress-inner {
-            width: 0;
-            height: 100%;
-            border-radius: inherit;
-            background-color: var(--ui-foreground-color);
-            transition: width 0.3s linear;
-        }
-
-        /* The right side of the inner progress bar starts aligned with the left side of the outer progress bar (container).
-           So, if the width is 30%, then the left side of the inner progress bar moves a total of 130% of the width of the container.
-           This is why the first keyframe is at 23% ((100/130)*30).
-         */
-        @keyframes indeterminate {
-            0% {
-                left: 0%;
-                width: 0%;
-            }
-            23% {
-                left: 0%;
-                width: 30%;
-            }
-            77% {
-                left: 70%;
-                width: 30%;
-            }
-            100% {
-                left: 100%;
-                width: 0%;
-            }
-        }
-
-        .loading-progress-inner-indeterminate {
-            position: absolute;
-            animation: indeterminate 1.5s infinite;
-            animation-timing-function: linear;
-        }
-
         .tool-bar {
+            position: absolute;
             display: flex;
             flex-direction: row;
             border-radius: 12px;
             border-color: var(--ui-foreground-color);
             height: 48px;
+            width: calc(100% - 24px);
+            min-width: 150px;
+            max-width: 1280px;
             bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--ui-background-color);
             color: var(--ui-foreground-color);
             -webkit-tap-highlight-color: transparent;
         }
@@ -302,7 +212,7 @@ export class HTML3DElement extends LitElement {
             height: 32px;
         }
 
-        .animation-timeline {
+        .progress-control {
             display: flex;
             flex: 1;
             position: relative;
@@ -313,7 +223,7 @@ export class HTML3DElement extends LitElement {
             border-color: inherit;
         }
 
-        .animation-timeline-input {
+        .progress-wrapper {
             -webkit-appearance: none;
             cursor: pointer;
             width: 100%;
@@ -325,13 +235,13 @@ export class HTML3DElement extends LitElement {
             background-color: transparent;
         }
 
-        .animation-timeline-input:focus-visible {
+        .progress-wrapper:focus-visible {
             border-color: inherit;
         }
 
         /*Chrome -webkit */
 
-        .animation-timeline-input::-webkit-slider-thumb {
+        .progress-wrapper::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 20px;
             height: 20px;
@@ -342,7 +252,7 @@ export class HTML3DElement extends LitElement {
             margin-top: -10px;
         }
 
-        .animation-timeline-input::-webkit-slider-runnable-track {
+        .progress-wrapper::-webkit-slider-runnable-track {
             height: 2px;
             -webkit-appearance: none;
             background-color: var(--ui-foreground-color);
@@ -350,12 +260,12 @@ export class HTML3DElement extends LitElement {
 
         /** FireFox -moz */
 
-        .animation-timeline-input::-moz-range-progress {
+        .progress-wrapper::-moz-range-progress {
             height: 2px;
             background-color: var(--ui-foreground-color);
         }
 
-        .animation-timeline-input::-moz-range-thumb {
+        .progress-wrapper::-moz-range-thumb {
             width: 16px;
             height: 16px;
             border: 2px solid var(--ui-foreground-color);
@@ -363,7 +273,7 @@ export class HTML3DElement extends LitElement {
             background: hsla(var(--ui-background-hue), var(--ui-background-saturation), var(--ui-background-lightness), 1);
         }
 
-        .animation-timeline-input::-moz-range-track {
+        .progress-wrapper::-moz-range-track {
             height: 2px;
             background: var(--ui-foreground-color);
         }
@@ -421,51 +331,11 @@ export class HTML3DElement extends LitElement {
     @property({ reflect: true })
     public environment: Nullable<string> = null;
 
-    @state()
-    private _loadingProgress: boolean | number = false;
-
-    /**
-     * Gets information about loading activity.
-     * @remarks
-     * false indicates no loading activity.
-     * true indicates loading activity with no progress information.
-     * A number between 0 and 1 indicates loading activity with progress information.
-     */
-    public get loadingProgress(): boolean | number {
-        return this._loadingProgress;
-    }
-
     /**
      * A value between 0 and 1 that specifies how much to blur the skybox.
      */
-    @property({ attribute: "skybox-blur" })
+    @property({ attribute: "skybox-blur", reflect: true })
     public skyboxBlur: Nullable<number> = null;
-
-    /**
-     * The tone mapping to use for rendering the scene.
-     */
-    @property({
-        attribute: "tone-mapping",
-        converter: (value: string | null): ToneMapping => {
-            if (!value || !isToneMapping(value)) {
-                return "neutral";
-            }
-            return value;
-        },
-    })
-    public toneMapping: Nullable<ToneMapping> = null;
-
-    /**
-     * The contrast applied to the scene.
-     */
-    @property()
-    public contrast: Nullable<number> = null;
-
-    /**
-     * The exposure applied to the scene.
-     */
-    @property()
-    public exposure: Nullable<number> = null;
 
     /**
      * The clear color (e.g. background color) for the viewer.
@@ -664,30 +534,17 @@ export class HTML3DElement extends LitElement {
 
     // eslint-disable-next-line babylonjs/available
     override render() {
-        const showProgressBar = this.loadingProgress !== false;
-        // If loadingProgress is true, then the progress bar is indeterminate so the value doesn't matter.
-        const progressValue = typeof this.loadingProgress === "boolean" ? 0 : this.loadingProgress * 100;
-        const isIndeterminate = this.loadingProgress === true;
-
         // NOTE: The unnamed 'slot' element holds all child elements of the <babylon-viewer> that do not specify a 'slot' attribute.
         return html`
             <div class="full-size">
                 <div id="canvasContainer" class="full-size"></div>
                 <slot class="full-size children-slot"></slot>
-                <slot name="progress-bar">
-                    <div part="progress-bar" class="bar loading-progress-outer ${showProgressBar ? "" : "loading-progress-outer-inactive"}" aria-label="Loading Progress">
-                        <div
-                            class="loading-progress-inner ${isIndeterminate ? "loading-progress-inner-indeterminate" : ""}"
-                            style="${isIndeterminate ? "" : `width: ${progressValue}%`}"
-                        ></div>
-                    </div>
-                </slot>
                 ${this.animations.length === 0
                     ? ""
                     : html`
                           <slot name="tool-bar">
-                              <div part="tool-bar" class="bar tool-bar">
-                                  <div class="animation-timeline">
+                              <div part="tool-bar" class="tool-bar">
+                                  <div class="progress-control">
                                       <button aria-label="${this.isAnimationPlaying ? "Pause" : "Play"}" @click="${this.toggleAnimation}">
                                           ${!this.isAnimationPlaying
                                               ? html`<svg viewBox="0 0 20 20">
@@ -699,7 +556,7 @@ export class HTML3DElement extends LitElement {
                                       </button>
                                       <input
                                           aria-label="Animation Progress"
-                                          class="animation-timeline-input"
+                                          class="progress-wrapper"
                                           type="range"
                                           min="0"
                                           max="1"
@@ -822,7 +679,7 @@ export class HTML3DElement extends LitElement {
 
             if (this._canvasContainer && !this._viewerDetails) {
                 const canvas = document.createElement("canvas");
-                canvas.className = "full-size canvas";
+                canvas.className = "full-size";
                 canvas.setAttribute("touch-action", "none");
                 this._canvasContainer.appendChild(canvas);
 
@@ -861,11 +718,6 @@ export class HTML3DElement extends LitElement {
                         details.viewer.onModelError.add((error) => {
                             this._animations = [...details.viewer.animations];
                             this._dispatchCustomEvent("modelerror", (type) => new ErrorEvent(type, { error }));
-                        });
-
-                        details.viewer.onLoadingProgressChanged.add(() => {
-                            this._loadingProgress = details.viewer.loadingProgress;
-                            this._dispatchCustomEvent("loadingprogresschange", (type) => new Event(type));
                         });
 
                         details.viewer.onIsAnimationPlayingChanged.add(() => {

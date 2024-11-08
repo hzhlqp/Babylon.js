@@ -8,7 +8,6 @@ uniform vec4 accumulationParameters;
 
 #define remanence accumulationParameters.x
 #define resetb accumulationParameters.y
-#define sceneSize accumulationParameters.z
 
 uniform sampler2D motionSampler;
 uniform sampler2D positionSampler;
@@ -38,7 +37,7 @@ void main(void) {
 
   PrevShadows.z =
       !reset && all(lessThan(abs(prevCoord - vec2(0.5)), vec2(0.5))) &&
-              distance(LP.xyz, PrevLP) < 5e-2 * sceneSize
+              distance(LP.xyz, PrevLP) < 5e-2
           ? max(PrevShadows.z / (1.0 + PrevShadows.z), 1.0 - remanence)
           : 1.0;
   PrevShadows = max(vec3(0.0), PrevShadows);

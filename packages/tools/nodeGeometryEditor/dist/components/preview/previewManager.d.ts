@@ -1,0 +1,34 @@
+import type { GlobalState } from "../../globalState";
+import "core/Rendering/depthRendererSceneComponent";
+export declare class PreviewManager {
+    private _nodeGeometry;
+    private _onBuildObserver;
+    private _onFrameObserver;
+    private _onExportToGLBObserver;
+    private _onAnimationCommandActivatedObserver;
+    private _onUpdateRequiredObserver;
+    private _onPreviewBackgroundChangedObserver;
+    private _onPreviewChangedObserver;
+    private _engine;
+    private _scene;
+    private _mesh;
+    private _camera;
+    private _light;
+    private _globalState;
+    private _matTexture;
+    private _matCap;
+    private _matStd;
+    private _matNME;
+    private _matVertexColor;
+    private _matNormals;
+    private _axis;
+    constructor(targetCanvas: HTMLCanvasElement, globalState: GlobalState);
+    private _updateStandardMaterial;
+    private _handleAnimations;
+    private _frameCamera;
+    private _prepareScene;
+    private _refreshPreviewMesh;
+    private _setMaterial;
+    private _updatePreview;
+    dispose(): void;
+}

@@ -1,0 +1,37 @@
+import type { Nullable } from "core/types";
+import type { Matrix } from "core/Maths/math.vector";
+import { Color3 } from "core/Maths/math.color";
+import type { IAnimatable } from "core/Animations/animatable.interface";
+import type { BaseTexture } from "core/Materials/Textures/baseTexture";
+import { PushMaterial } from "core/Materials/pushMaterial";
+import type { AbstractMesh } from "core/Meshes/abstractMesh";
+import type { SubMesh } from "core/Meshes/subMesh";
+import type { Mesh } from "core/Meshes/mesh";
+import { Scene } from "core/scene";
+import "./gradient.fragment";
+import "./gradient.vertex";
+export declare class GradientMaterial extends PushMaterial {
+    private _maxSimultaneousLights;
+    maxSimultaneousLights: number;
+    topColor: Color3;
+    topColorAlpha: number;
+    bottomColor: Color3;
+    bottomColorAlpha: number;
+    offset: number;
+    scale: number;
+    smoothness: number;
+    private _disableLighting;
+    disableLighting: boolean;
+    constructor(name: string, scene?: Scene);
+    needAlphaBlending(): boolean;
+    needAlphaTesting(): boolean;
+    getAlphaTestTexture(): Nullable<BaseTexture>;
+    isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
+    bindForSubMesh(world: Matrix, mesh: Mesh, subMesh: SubMesh): void;
+    getAnimatables(): IAnimatable[];
+    dispose(forceDisposeEffect?: boolean): void;
+    clone(name: string): GradientMaterial;
+    serialize(): any;
+    getClassName(): string;
+    static Parse(source: any, scene: Scene, rootUrl: string): GradientMaterial;
+}

@@ -1,0 +1,17 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import * as React from "react";
+import { CommonCameraPropertyGridComponent } from "./commonCameraPropertyGridComponent";
+import { LineContainerComponent } from "shared-ui-components/lines/lineContainerComponent";
+import { Vector3LineComponent } from "shared-ui-components/lines/vector3LineComponent";
+import { FloatLineComponent } from "shared-ui-components/lines/floatLineComponent";
+import { CheckBoxLineComponent } from "shared-ui-components/lines/checkBoxLineComponent";
+export class FreeCameraPropertyGridComponent extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        const camera = this.props.camera;
+        return (_jsxs(_Fragment, { children: [_jsx(CommonCameraPropertyGridComponent, { globalState: this.props.globalState, lockObject: this.props.lockObject, camera: camera, onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsxs(LineContainerComponent, { title: "TRANSFORMS", selection: this.props.globalState, children: [_jsx(Vector3LineComponent, { lockObject: this.props.lockObject, label: "Target", target: camera, propertyName: "target", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(Vector3LineComponent, { lockObject: this.props.lockObject, label: "Position", target: camera, propertyName: "position", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(Vector3LineComponent, { lockObject: this.props.lockObject, label: "Rotation", noSlider: true, useEuler: this.props.globalState.onlyUseEulers, target: camera, propertyName: "rotation", onPropertyChangedObservable: this.props.onPropertyChangedObservable })] }), _jsxs(LineContainerComponent, { title: "CONTROLS", closed: true, selection: this.props.globalState, children: [_jsx(FloatLineComponent, { lockObject: this.props.lockObject, label: "Angular sensitivity", target: camera, propertyName: "angularSensibility", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(FloatLineComponent, { lockObject: this.props.lockObject, label: "Speed", target: camera, propertyName: "speed", onPropertyChangedObservable: this.props.onPropertyChangedObservable })] }), _jsxs(LineContainerComponent, { title: "COLLISIONS", closed: true, selection: this.props.globalState, children: [_jsx(CheckBoxLineComponent, { label: "Check collisions", target: camera, propertyName: "checkCollisions", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(CheckBoxLineComponent, { label: "Apply gravity", target: camera, propertyName: "applyGravity", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(Vector3LineComponent, { lockObject: this.props.lockObject, label: "Ellipsoid", target: camera, propertyName: "ellipsoid", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(Vector3LineComponent, { lockObject: this.props.lockObject, label: "Ellipsoid offset", target: camera, propertyName: "ellipsoidOffset", onPropertyChangedObservable: this.props.onPropertyChangedObservable })] })] }));
+    }
+}
+//# sourceMappingURL=freeCameraPropertyGridComponent.js.map

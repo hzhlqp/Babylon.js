@@ -1,0 +1,9 @@
+/* eslint-disable import/no-internal-modules */
+import { NodeRenderGraphEditor } from "../index";
+const globalObject = typeof global !== "undefined" ? global : typeof window !== "undefined" ? window : undefined;
+if (typeof globalObject !== "undefined") {
+    globalObject.BABYLON = globalObject.BABYLON || {};
+    globalObject.BABYLON.NodeRenderGraphEditor = NodeRenderGraphEditor;
+}
+export * from "../index";
+//# sourceMappingURL=legacy.js.map

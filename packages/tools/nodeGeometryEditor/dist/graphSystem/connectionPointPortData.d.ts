@@ -1,0 +1,33 @@
+import type { NodeGeometryBlock } from "core/Meshes/Node/nodeGeometryBlock";
+import { type NodeGeometryConnectionPoint, NodeGeometryConnectionPointCompatibilityStates } from "core/Meshes/Node/nodeGeometryBlockConnectionPoint";
+import type { Nullable } from "core/types";
+import type { GraphNode } from "shared-ui-components/nodeGraphSystem/graphNode";
+import type { INodeContainer } from "shared-ui-components/nodeGraphSystem/interfaces/nodeContainer";
+import type { IPortData } from "shared-ui-components/nodeGraphSystem/interfaces/portData";
+import { PortDataDirection } from "shared-ui-components/nodeGraphSystem/interfaces/portData";
+export declare class ConnectionPointPortData implements IPortData {
+    private _connectedPort;
+    private _nodeContainer;
+    data: NodeGeometryConnectionPoint;
+    get name(): string;
+    get internalName(): string;
+    get isExposedOnFrame(): boolean;
+    set isExposedOnFrame(value: boolean);
+    get exposedPortPosition(): number;
+    set exposedPortPosition(value: number);
+    get isConnected(): boolean;
+    get connectedPort(): Nullable<IPortData>;
+    set connectedPort(value: Nullable<IPortData>);
+    get direction(): PortDataDirection;
+    get ownerData(): NodeGeometryBlock;
+    get needDualDirectionValidation(): boolean;
+    get hasEndpoints(): boolean;
+    get endpoints(): IPortData[];
+    constructor(connectionPoint: NodeGeometryConnectionPoint, nodeContainer: INodeContainer);
+    updateDisplayName(newName: string): void;
+    connectTo(port: IPortData): void;
+    canConnectTo(port: IPortData): boolean;
+    disconnectFrom(port: IPortData): void;
+    checkCompatibilityState(port: IPortData): 0 | NodeGeometryConnectionPointCompatibilityStates.TypeIncompatible | NodeGeometryConnectionPointCompatibilityStates.HierarchyIssue;
+    getCompatibilityIssueMessage(issue: number, targetNode: GraphNode, targetPort: IPortData): "" | "Cannot connect two different connection types" | "Source block cannot be connected with one of its ancestors";
+}

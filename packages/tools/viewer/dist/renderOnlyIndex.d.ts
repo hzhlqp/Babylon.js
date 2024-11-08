@@ -1,0 +1,11 @@
+import { RenderOnlyViewer } from "./viewer/renderOnlyViewer";
+import "loaders/glTF/2.0";
+import "core/Lights/Shadows/shadowGeneratorSceneComponent";
+import "core/Debug/debugLayer";
+import "core/Meshes/Builders/planeBuilder";
+import "core/Meshes/Builders/boxBuilder";
+import "core/Materials/Textures/Loaders/ddsTextureLoader";
+import "core/Materials/Textures/Loaders/envTextureLoader";
+import "core/Materials/Textures/Loaders/ktxTextureLoader";
+import "core/PostProcesses/RenderPipeline/postProcessRenderPipelineManagerSceneComponent";
+export { RenderOnlyViewer };

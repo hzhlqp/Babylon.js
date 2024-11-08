@@ -1,1 +1,1 @@
-export * from "./htmlMesh";
+export const empty = {};

@@ -1,0 +1,30 @@
+import type { Nullable } from "core/types";
+import type { Matrix } from "core/Maths/math.vector";
+import { Color3 } from "core/Maths/math.color";
+import type { BaseTexture } from "core/Materials/Textures/baseTexture";
+import type { IShadowLight } from "core/Lights/shadowLight";
+import { PushMaterial } from "core/Materials/pushMaterial";
+import type { AbstractMesh } from "core/Meshes/abstractMesh";
+import type { SubMesh } from "core/Meshes/subMesh";
+import type { Mesh } from "core/Meshes/mesh";
+import { Scene } from "core/scene";
+import "./shadowOnly.fragment";
+import "./shadowOnly.vertex";
+export declare class ShadowOnlyMaterial extends PushMaterial {
+    private _activeLight;
+    private _needAlphaBlending;
+    constructor(name: string, scene?: Scene);
+    shadowColor: Color3;
+    needAlphaBlending(): boolean;
+    needAlphaTesting(): boolean;
+    getAlphaTestTexture(): Nullable<BaseTexture>;
+    get activeLight(): IShadowLight;
+    set activeLight(light: IShadowLight);
+    private _getFirstShadowLightForMesh;
+    isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
+    bindForSubMesh(world: Matrix, mesh: Mesh, subMesh: SubMesh): void;
+    clone(name: string): ShadowOnlyMaterial;
+    serialize(): any;
+    getClassName(): string;
+    static Parse(source: any, scene: Scene, rootUrl: string): ShadowOnlyMaterial;
+}

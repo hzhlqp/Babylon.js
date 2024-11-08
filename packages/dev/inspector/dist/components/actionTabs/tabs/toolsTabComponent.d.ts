@@ -1,0 +1,37 @@
+import type { IPaneComponentProps } from "../paneComponent";
+import { PaneComponent } from "../paneComponent";
+export declare class ToolsTabComponent extends PaneComponent {
+    private _lockObject;
+    private _videoRecorder;
+    private _screenShotSize;
+    private _gifOptions;
+    private _useWidthHeight;
+    private _isExportingGltf;
+    private _gltfExportOptions;
+    private _gifWorkerBlob;
+    private _gifRecorder;
+    private _previousRenderingScale;
+    private _crunchingGIF;
+    private _reflectorHostname;
+    private _reflectorPort;
+    private _reflector;
+    private _envOptions;
+    constructor(props: IPaneComponentProps);
+    componentDidMount(): void;
+    componentWillUnmount(): void;
+    captureScreenshot(): void;
+    captureEquirectangular(): void;
+    captureRender(): void;
+    recordVideo(): void;
+    recordGIFInternal(): void;
+    recordGIF(): void;
+    importAnimations(event: any): void;
+    exportGLTF(): void;
+    exportBabylon(): void;
+    createEnvTexture(): void;
+    exportReplay(): void;
+    startRecording(): void;
+    applyDelta(file: File): void;
+    connectReflector(): void;
+    render(): import("react/jsx-runtime").JSX.Element | null;
+}

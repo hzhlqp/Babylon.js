@@ -1,0 +1,34 @@
+import type { NodeMaterialBlock } from "core/Materials/Node/nodeMaterialBlock";
+import type { NodeMaterialConnectionPoint } from "core/Materials/Node/nodeMaterialBlockConnectionPoint";
+import { NodeMaterialConnectionPointCompatibilityStates } from "core/Materials/Node/nodeMaterialBlockConnectionPoint";
+import type { Nullable } from "core/types";
+import type { GraphNode } from "shared-ui-components/nodeGraphSystem/graphNode";
+import type { INodeContainer } from "shared-ui-components/nodeGraphSystem/interfaces/nodeContainer";
+import type { IPortData } from "shared-ui-components/nodeGraphSystem/interfaces/portData";
+import { PortDataDirection } from "shared-ui-components/nodeGraphSystem/interfaces/portData";
+export declare class ConnectionPointPortData implements IPortData {
+    private _connectedPort;
+    private _nodeContainer;
+    data: NodeMaterialConnectionPoint;
+    get name(): string;
+    get internalName(): string;
+    get isExposedOnFrame(): boolean;
+    set isExposedOnFrame(value: boolean);
+    get exposedPortPosition(): number;
+    set exposedPortPosition(value: number);
+    get isConnected(): boolean;
+    get connectedPort(): Nullable<IPortData>;
+    set connectedPort(value: Nullable<IPortData>);
+    get direction(): PortDataDirection;
+    get ownerData(): NodeMaterialBlock;
+    get needDualDirectionValidation(): boolean;
+    get hasEndpoints(): boolean;
+    get endpoints(): IPortData[];
+    constructor(connectionPoint: NodeMaterialConnectionPoint, nodeContainer: INodeContainer);
+    updateDisplayName(newName: string): void;
+    connectTo(port: IPortData): void;
+    canConnectTo(port: IPortData): boolean;
+    disconnectFrom(port: IPortData): void;
+    checkCompatibilityState(port: IPortData): 0 | NodeMaterialConnectionPointCompatibilityStates.TypeIncompatible | NodeMaterialConnectionPointCompatibilityStates.TargetIncompatible | NodeMaterialConnectionPointCompatibilityStates.HierarchyIssue;
+    getCompatibilityIssueMessage(issue: number, targetNode: GraphNode, targetPort: IPortData): "" | "Cannot connect two different connection types" | "Source block can only work in fragment shader whereas destination block is currently aimed for the vertex shader" | "Source block cannot be connected with one of its ancestors";
+}

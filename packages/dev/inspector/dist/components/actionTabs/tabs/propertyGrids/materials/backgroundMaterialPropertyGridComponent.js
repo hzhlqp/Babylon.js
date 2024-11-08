@@ -1,0 +1,25 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import * as React from "react";
+import { Observable } from "core/Misc/observable";
+import { LineContainerComponent } from "shared-ui-components/lines/lineContainerComponent";
+import { Color3LineComponent } from "shared-ui-components/lines/color3LineComponent";
+import { CheckBoxLineComponent } from "shared-ui-components/lines/checkBoxLineComponent";
+import { SliderLineComponent } from "shared-ui-components/lines/sliderLineComponent";
+import { CommonMaterialPropertyGridComponent } from "./commonMaterialPropertyGridComponent";
+import { TextureLinkLineComponent } from "../../../lines/textureLinkLineComponent";
+export class BackgroundMaterialPropertyGridComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        this._onDebugSelectionChangeObservable = new Observable();
+    }
+    renderTextures() {
+        const material = this.props.material;
+        const onDebugSelectionChangeObservable = this._onDebugSelectionChangeObservable;
+        return (_jsxs(LineContainerComponent, { title: "TEXTURES", selection: this.props.globalState, children: [_jsx(TextureLinkLineComponent, { label: "Diffuse", texture: material.diffuseTexture, material: material, onSelectionChangedObservable: this.props.onSelectionChangedObservable, onDebugSelectionChangeObservable: onDebugSelectionChangeObservable }), _jsx(TextureLinkLineComponent, { label: "Reflection", texture: material.reflectionTexture, material: material, onSelectionChangedObservable: this.props.onSelectionChangedObservable, onDebugSelectionChangeObservable: onDebugSelectionChangeObservable }), material.reflectionTexture && (_jsx(SliderLineComponent, { lockObject: this.props.lockObject, label: "Reflection blur", target: material, propertyName: "reflectionBlur", minimum: 0, maximum: 1, step: 0.01, onPropertyChangedObservable: this.props.onPropertyChangedObservable }))] }));
+    }
+    render() {
+        const material = this.props.material;
+        return (_jsxs(_Fragment, { children: [_jsx(CommonMaterialPropertyGridComponent, { globalState: this.props.globalState, lockObject: this.props.lockObject, material: material, onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsxs(LineContainerComponent, { title: "LIGHTING & COLORS", selection: this.props.globalState, children: [_jsx(Color3LineComponent, { lockObject: this.props.lockObject, label: "Primary", target: material, propertyName: "primaryColor", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(SliderLineComponent, { lockObject: this.props.lockObject, label: "Shadow level", target: material, propertyName: "primaryColorShadowLevel", minimum: 0, maximum: 1, step: 0.01, onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(SliderLineComponent, { lockObject: this.props.lockObject, label: "Highlight level", target: material, propertyName: "primaryColorHighlightLevel", minimum: 0, maximum: 1, step: 0.01, onPropertyChangedObservable: this.props.onPropertyChangedObservable })] }), this.renderTextures(), _jsxs(LineContainerComponent, { title: "RENDERING", closed: true, selection: this.props.globalState, children: [_jsx(CheckBoxLineComponent, { label: "Ground Projection", target: material, propertyName: "enableGroundProjection", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), material.enableGroundProjection && (_jsxs("div", { className: "fragment", children: [_jsx(SliderLineComponent, { lockObject: this.props.lockObject, label: "Ground radius", target: material, propertyName: "projectedGroundRadius", minimum: 0, maximum: 10000, step: 10, onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(SliderLineComponent, { lockObject: this.props.lockObject, label: "Ground height", target: material, propertyName: "projectedGroundHeight", minimum: 1, maximum: 1000, step: 10, onPropertyChangedObservable: this.props.onPropertyChangedObservable })] })), _jsx(CheckBoxLineComponent, { label: "Enable noise", target: material, propertyName: "enableNoise", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(CheckBoxLineComponent, { label: "Opacity fresnel", target: material, propertyName: "opacityFresnel", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(CheckBoxLineComponent, { label: "Reflection fresnel", target: material, propertyName: "reflectionFresnel", onPropertyChangedObservable: this.props.onPropertyChangedObservable }), _jsx(SliderLineComponent, { lockObject: this.props.lockObject, label: "Reflection amount", target: material, propertyName: "reflectionAmount", minimum: 0, maximum: 1, step: 0.01, onPropertyChangedObservable: this.props.onPropertyChangedObservable })] })] }));
+    }
+}
+//# sourceMappingURL=backgroundMaterialPropertyGridComponent.js.map

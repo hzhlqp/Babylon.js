@@ -1,0 +1,36 @@
+import type { Nullable } from "core/types";
+import type { Observer } from "core/Misc/observable";
+import type { Vector2 } from "core/Maths/math.vector";
+import type { GraphNode } from "./graphNode";
+import type { StateManager } from "./stateManager";
+import type { ISelectionChangedOptions } from "./interfaces/selectionChangedOptions";
+import type { FrameNodePort } from "./frameNodePort";
+import type { IDisplayManager } from "./interfaces/displayManager";
+import type { IPortData } from "./interfaces/portData";
+export declare class NodePort {
+    portData: IPortData;
+    node: GraphNode;
+    protected _element: HTMLDivElement;
+    protected _img: HTMLImageElement;
+    protected _pip: HTMLDivElement;
+    protected _stateManager: StateManager;
+    protected _portLabelElement: Element;
+    protected _onCandidateLinkMovedObserver: Nullable<Observer<Nullable<Vector2>>>;
+    protected _onSelectionChangedObserver: Nullable<Observer<Nullable<ISelectionChangedOptions>>>;
+    protected _exposedOnFrame: boolean;
+    delegatedPort: Nullable<FrameNodePort>;
+    get element(): HTMLDivElement;
+    get portName(): string;
+    set portName(newName: string);
+    get disabled(): boolean;
+    hasLabel(): boolean;
+    get exposedOnFrame(): boolean;
+    set exposedOnFrame(value: boolean);
+    get exposedPortPosition(): number;
+    set exposedPortPosition(value: number);
+    private _isConnectedToNodeOutsideOfFrame;
+    refresh(): void;
+    constructor(portContainer: HTMLElement, portData: IPortData, node: GraphNode, stateManager: StateManager);
+    dispose(): void;
+    static CreatePortElement(portData: IPortData, node: GraphNode, root: HTMLElement, displayManager: Nullable<IDisplayManager>, stateManager: StateManager): NodePort;
+}

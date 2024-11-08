@@ -1,0 +1,31 @@
+import type { GlobalState } from "../../globalState";
+import "core/Rendering/depthRendererSceneComponent";
+export declare class PreviewManager {
+    private _nodeRenderGraph;
+    private _onFrameObserver;
+    private _onPreviewCommandActivatedObserver;
+    private _onUpdateRequiredObserver;
+    private _onRebuildRequiredObserver;
+    private _onImportFrameObserver;
+    private _onResetRequiredObserver;
+    private _onLightUpdatedObserver;
+    private _engine;
+    private _scene;
+    private _globalState;
+    private _currentType;
+    private _lightParent;
+    private _hdrTexture;
+    constructor(targetCanvas: HTMLCanvasElement, globalState: GlobalState);
+    private _initAsync;
+    private _initScene;
+    private _reset;
+    private _prepareLights;
+    private _createNodeRenderGraph;
+    private _buildGraph;
+    private _frameCamera;
+    private _prepareBackgroundHDR;
+    private _prepareScene;
+    static DefaultEnvironmentURL: string;
+    private _refreshPreviewMesh;
+    dispose(): void;
+}

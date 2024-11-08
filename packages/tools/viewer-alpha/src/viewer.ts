@@ -7,7 +7,6 @@ import type {
     FramingBehavior,
     HotSpotQuery,
     IDisposable,
-    ISceneLoaderProgressEvent,
     LoadAssetContainerOptions,
     Mesh,
     Nullable,
@@ -18,7 +17,6 @@ import type {
 import { ArcRotateCamera } from "core/Cameras/arcRotateCamera";
 import { HemisphericLight } from "core/Lights/hemisphericLight";
 import { loadAssetContainerAsync } from "core/Loading/sceneLoader";
-import { ImageProcessingConfiguration } from "core/Materials/imageProcessingConfiguration";
 import { PBRMaterial } from "core/Materials/PBR/pbrMaterial";
 import { CubeTexture } from "core/Materials/Textures/cubeTexture";
 import { Texture } from "core/Materials/Textures/texture";
@@ -34,18 +32,6 @@ import { Viewport } from "core/Maths/math.viewport";
 import { GetHotSpotToRef } from "core/Meshes/abstractMesh.hotSpot";
 import { SnapshotRenderingHelper } from "core/Misc/snapshotRenderingHelper";
 
-const toneMappingOptions = ["none", "standard", "aces", "neutral"] as const;
-export type ToneMapping = (typeof toneMappingOptions)[number];
-
-/**
- * Checks if the given value is a valid tone mapping option.
- * @param value The value to check.
- * @returns True if the value is a valid tone mapping option, otherwise false.
- */
-export function isToneMapping(value: string): value is ToneMapping {
-    return toneMappingOptions.includes(value as ToneMapping);
-}
-
 function throwIfAborted(...abortSignals: (Nullable<AbortSignal> | undefined)[]): void {
     for (const signal of abortSignals) {
         signal?.throwIfAborted();
@@ -55,8 +41,6 @@ function throwIfAborted(...abortSignals: (Nullable<AbortSignal> | undefined)[]):
 function createSkybox(scene: Scene, camera: Camera, environmentTexture: CubeTexture, blur: number): Mesh {
     const hdrSkybox = CreateBox("hdrSkyBox", undefined, scene);
     const hdrSkyboxMaterial = new PBRMaterial("skyBox", scene);
-    // Use the default image processing configuration on the skybox (e.g. don't apply tone mapping, contrast, or exposure).
-    hdrSkyboxMaterial.imageProcessingConfiguration = new ImageProcessingConfiguration();
     hdrSkyboxMaterial.backFaceCulling = false;
     hdrSkyboxMaterial.reflectionTexture = environmentTexture.clone();
     if (hdrSkyboxMaterial.reflectionTexture) {
@@ -167,21 +151,6 @@ export class Viewer implements IDisposable {
     public readonly onSkyboxBlurChanged = new Observable<void>();
 
     /**
-     * Fired when the tone mapping changes.
-     */
-    public readonly onToneMappingChanged = new Observable<void>();
-
-    /**
-     * Fired when the contrast changes.
-     */
-    public readonly onContrastChanged = new Observable<void>();
-
-    /**
-     * Fired when the exposure changes.
-     */
-    public readonly onExposureChanged = new Observable<void>();
-
-    /**
      * Fired when a model is loaded into the viewer (or unloaded from the viewer).
      */
     public readonly onModelChanged = new Observable<void>();
@@ -190,11 +159,6 @@ export class Viewer implements IDisposable {
      * Fired when an error occurs while loading a model.
      */
     public readonly onModelError = new Observable<unknown>();
-
-    /**
-     * Fired when progress changes on loading activity.
-     */
-    public readonly onLoadingProgressChanged = new Observable<void>();
 
     /**
      * Fired when the camera auto orbit state changes.
@@ -225,14 +189,9 @@ export class Viewer implements IDisposable {
     private readonly _snapshotHelper: SnapshotRenderingHelper;
     private readonly _autoRotationBehavior: AutoRotationBehavior;
     private readonly _renderLoopController: IDisposable;
-    private readonly _imageProcessingConfigurationObserver: Observer<ImageProcessingConfiguration>;
     private _skybox: Nullable<Mesh> = null;
     private _skyboxBlur: number = 0.3;
     private _light: Nullable<HemisphericLight> = null;
-    private _toneMappingEnabled: boolean;
-    private _toneMappingType: number;
-    private _contrast: number;
-    private _exposure: number;
 
     private _isDisposed = false;
 
@@ -242,9 +201,6 @@ export class Viewer implements IDisposable {
     private readonly _loadEnvironmentLock = new AsyncLock();
     private _environment: Nullable<IDisposable> = null;
     private _loadEnvironmentAbortController: Nullable<AbortController> = null;
-
-    private _isLoadingModel = false;
-    private _modelLoadingProgress: Nullable<number> = null;
 
     private _selectedAnimation = -1;
     private _activeAnimationObservers: Observer<AnimationGroup>[] = [];
@@ -256,35 +212,6 @@ export class Viewer implements IDisposable {
     ) {
         {
             const scene = new Scene(this._engine);
-
-            // Deduce tone mapping, contrast, and exposure from the scene (so the viewer stays in sync if anything mutates these values directly on the scene).
-            this._toneMappingEnabled = scene.imageProcessingConfiguration.toneMappingEnabled;
-            this._toneMappingType = scene.imageProcessingConfiguration.toneMappingType;
-            this._contrast = scene.imageProcessingConfiguration.contrast;
-            this._exposure = scene.imageProcessingConfiguration.exposure;
-
-            this._imageProcessingConfigurationObserver = scene.imageProcessingConfiguration.onUpdateParameters.add(() => {
-                if (this._toneMappingEnabled !== scene.imageProcessingConfiguration.toneMappingEnabled) {
-                    this._toneMappingEnabled = scene.imageProcessingConfiguration.toneMappingEnabled;
-                    this.onToneMappingChanged.notifyObservers();
-                }
-
-                if (this._toneMappingType !== scene.imageProcessingConfiguration.toneMappingType) {
-                    this._toneMappingType = scene.imageProcessingConfiguration.toneMappingType;
-                    this.onToneMappingChanged.notifyObservers();
-                }
-
-                if (this._contrast !== scene.imageProcessingConfiguration.contrast) {
-                    this._contrast = scene.imageProcessingConfiguration.contrast;
-                    this.onContrastChanged.notifyObservers();
-                }
-
-                if (this._exposure !== scene.imageProcessingConfiguration.exposure) {
-                    this._exposure = scene.imageProcessingConfiguration.exposure;
-                    this.onExposureChanged.notifyObservers();
-                }
-            });
-
             const camera = new ArcRotateCamera("Viewer Default Camera", 0, 0, 1, Vector3.Zero(), scene);
             this._details = {
                 viewer: this,
@@ -299,9 +226,6 @@ export class Viewer implements IDisposable {
         this._details.camera.attachControl();
         this._updateCamera(); // set default camera values
         this._autoRotationBehavior = this._details.camera.getBehaviorByName("AutoRotation") as AutoRotationBehavior;
-
-        // Default to KHR PBR Neutral tone mapping.
-        this.toneMapping = "neutral";
 
         // Load a default light, but ignore errors as the user might be immediately loading their own environment.
         this.resetEnvironment().catch(() => {});
@@ -361,90 +285,6 @@ export class Viewer implements IDisposable {
             }
             this.onSkyboxBlurChanged.notifyObservers();
         }
-    }
-
-    /**
-     * The tone mapping to use for rendering the scene.
-     */
-    public get toneMapping(): ToneMapping | "unknown" {
-        if (!this._toneMappingEnabled) {
-            return "none";
-        }
-
-        switch (this._toneMappingType) {
-            case ImageProcessingConfiguration.TONEMAPPING_STANDARD:
-                return "standard";
-            case ImageProcessingConfiguration.TONEMAPPING_ACES:
-                return "aces";
-            case ImageProcessingConfiguration.TONEMAPPING_KHR_PBR_NEUTRAL:
-                return "neutral";
-            default:
-                return "unknown";
-        }
-    }
-
-    public set toneMapping(value: ToneMapping) {
-        this._snapshotHelper.disableSnapshotRendering();
-
-        if (value === "none") {
-            this._details.scene.imageProcessingConfiguration.toneMappingEnabled = false;
-        } else {
-            switch (value) {
-                case "standard":
-                    this._details.scene.imageProcessingConfiguration.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_STANDARD;
-                    break;
-                case "aces":
-                    this._details.scene.imageProcessingConfiguration.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES;
-                    break;
-                case "neutral":
-                    this._details.scene.imageProcessingConfiguration.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_KHR_PBR_NEUTRAL;
-                    break;
-            }
-            this._details.scene.imageProcessingConfiguration.toneMappingEnabled = true;
-        }
-
-        this._snapshotHelper.enableSnapshotRendering();
-    }
-
-    /**
-     * The contrast applied to the scene.
-     */
-    public get contrast(): number {
-        return this._contrast;
-    }
-
-    public set contrast(value: number) {
-        this._snapshotHelper.disableSnapshotRendering();
-        this._details.scene.imageProcessingConfiguration.contrast = value;
-        this._snapshotHelper.enableSnapshotRendering();
-    }
-
-    /**
-     * The exposure applied to the scene.
-     */
-    public get exposure(): number {
-        return this._exposure;
-    }
-
-    public set exposure(value: number) {
-        this._snapshotHelper.disableSnapshotRendering();
-        this._details.scene.imageProcessingConfiguration.exposure = value;
-        this._snapshotHelper.enableSnapshotRendering();
-    }
-
-    /**
-     * Gets information about loading activity.
-     * @remarks
-     * false indicates no loading activity.
-     * true indicates loading activity with no progress information.
-     * A number between 0 and 1 indicates loading activity with progress information.
-     */
-    public get loadingProgress(): boolean | number {
-        if (this._isLoadingModel) {
-            return this._modelLoadingProgress ?? true;
-        }
-
-        return false;
     }
 
     /**
@@ -566,31 +406,6 @@ export class Viewer implements IDisposable {
     private async _updateModel(source: string | File | ArrayBufferView | undefined, options?: LoadAssetContainerOptions, abortSignal?: AbortSignal): Promise<void> {
         this._throwIfDisposedOrAborted(abortSignal);
 
-        const originalOnProgress = options?.onProgress;
-        const onProgress = (event: ISceneLoaderProgressEvent) => {
-            originalOnProgress?.(event);
-            if (this._isLoadingModel) {
-                this._modelLoadingProgress = event.lengthComputable ? event.loaded / event.total : null;
-                this.onLoadingProgressChanged.notifyObservers();
-            }
-        };
-
-        // Enable transparency as coverage by default to be 3D Commerce compliant by default.
-        // https://doc.babylonjs.com/setup/support/3D_commerce_certif
-        if (!options?.pluginOptions?.gltf?.transparencyAsCoverage) {
-            options = {
-                ...options,
-                pluginOptions: {
-                    ...options?.pluginOptions,
-                    gltf: {
-                        ...options?.pluginOptions?.gltf,
-                        transparencyAsCoverage: true,
-                    },
-                },
-                onProgress,
-            };
-        }
-
         this._loadModelAbortController?.abort("New model is being loaded before previous model finished loading.");
         const abortController = (this._loadModelAbortController = new AbortController());
 
@@ -603,9 +418,6 @@ export class Viewer implements IDisposable {
 
             try {
                 if (source) {
-                    this._isLoadingModel = true;
-                    this._modelLoadingProgress = 0;
-                    this.onLoadingProgressChanged.notifyObservers();
                     this._details.model = await loadAssetContainerAsync(source, this._details.scene, options);
                     this._details.model.animationGroups.forEach((group) => {
                         group.start(true, this.animationSpeed);
@@ -624,8 +436,6 @@ export class Viewer implements IDisposable {
                 this.onModelError.notifyObservers(e);
                 throw e;
             } finally {
-                this._isLoadingModel = false;
-                this.onLoadingProgressChanged.notifyObservers();
                 this._snapshotHelper.enableSnapshotRendering();
             }
         });
@@ -753,9 +563,6 @@ export class Viewer implements IDisposable {
         this.onEnvironmentChanged.clear();
         this.onEnvironmentError.clear();
         this.onSkyboxBlurChanged.clear();
-        this.onToneMappingChanged.clear();
-        this.onContrastChanged.clear();
-        this.onExposureChanged.clear();
         this.onModelChanged.clear();
         this.onModelError.clear();
         this.onCameraAutoOrbitChanged.clear();
@@ -763,9 +570,6 @@ export class Viewer implements IDisposable {
         this.onAnimationSpeedChanged.clear();
         this.onIsAnimationPlayingChanged.clear();
         this.onAnimationProgressChanged.clear();
-        this.onLoadingProgressChanged.clear();
-
-        this._imageProcessingConfigurationObserver.remove();
 
         this._isDisposed = true;
     }

@@ -1,0 +1,1 @@
+{"version":3,"file":"displayLedger.js","sourceRoot":"","sources":["../../src/nodeGraphSystem/displayLedger.ts"],"names":[],"mappings":"AAAA,MAAM,OAAO,aAAa;;AACR,gCAAkB,GAA2B,EAAE,CAAC","sourcesContent":["export class DisplayLedger {\r\n    public static RegisteredControls: { [key: string]: any } = {};\r\n}\r\n"]}

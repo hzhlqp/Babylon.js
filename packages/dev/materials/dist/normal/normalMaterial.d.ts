@@ -1,0 +1,36 @@
+import type { Nullable } from "core/types";
+import type { Matrix } from "core/Maths/math.vector";
+import { Color3 } from "core/Maths/math.color";
+import type { IAnimatable } from "core/Animations/animatable.interface";
+import type { BaseTexture } from "core/Materials/Textures/baseTexture";
+import { PushMaterial } from "core/Materials/pushMaterial";
+import type { AbstractMesh } from "core/Meshes/abstractMesh";
+import type { SubMesh } from "core/Meshes/subMesh";
+import type { Mesh } from "core/Meshes/mesh";
+import { Scene } from "core/scene";
+import "./normal.fragment";
+import "./normal.vertex";
+export declare class NormalMaterial extends PushMaterial {
+    private _diffuseTexture;
+    diffuseTexture: BaseTexture;
+    diffuseColor: Color3;
+    private _disableLighting;
+    disableLighting: boolean;
+    private _maxSimultaneousLights;
+    maxSimultaneousLights: number;
+    constructor(name: string, scene?: Scene);
+    needAlphaBlending(): boolean;
+    needAlphaBlendingForMesh(mesh: AbstractMesh): boolean;
+    needAlphaTesting(): boolean;
+    getAlphaTestTexture(): Nullable<BaseTexture>;
+    isReadyForSubMesh(mesh: AbstractMesh, subMesh: SubMesh, useInstances?: boolean): boolean;
+    bindForSubMesh(world: Matrix, mesh: Mesh, subMesh: SubMesh): void;
+    getAnimatables(): IAnimatable[];
+    getActiveTextures(): BaseTexture[];
+    hasTexture(texture: BaseTexture): boolean;
+    dispose(forceDisposeEffect?: boolean): void;
+    clone(name: string): NormalMaterial;
+    serialize(): any;
+    getClassName(): string;
+    static Parse(source: any, scene: Scene, rootUrl: string): NormalMaterial;
+}

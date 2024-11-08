@@ -439,7 +439,6 @@ export class NodeGeometry {
                 blockId: number;
                 x: number;
                 y: number;
-                isCollapsed: boolean;
             }[] = source.locations || source.editorData.locations;
 
             for (const location of locations) {

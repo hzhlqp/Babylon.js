@@ -2,7 +2,6 @@ export interface INodeLocationInfo {
     blockId: number;
     x: number;
     y: number;
-    isCollapsed: boolean;
 }
 
 export interface IFrameData {

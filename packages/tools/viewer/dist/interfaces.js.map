@@ -1,0 +1,1 @@
+{"version":3,"file":"interfaces.js","sourceRoot":"","sources":["../src/interfaces.ts"],"names":[],"mappings":"AAAA,MAAM,CAAN,IAAkB,cAIjB;AAJD,WAAkB,cAAc;IAC5B,mEAAY,CAAA;IACZ,2DAAQ,CAAA;IACR,yDAAO,CAAA;AACX,CAAC,EAJiB,cAAc,KAAd,cAAc,QAI/B","sourcesContent":["export const enum CameraBehavior {\r\n    AUTOROTATION,\r\n    BOUNCING,\r\n    FRAMING,\r\n}\r\n"]}
