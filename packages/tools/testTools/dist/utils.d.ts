@@ -9,7 +9,7 @@ export interface CountValues {
     eventsRegistered: typeof window.eventsRegistered;
 }
 export declare const countCurrentObjects: (initialValues: CountValues, classes?: string[], checkGlobalObjects?: boolean, flip?: boolean) => Promise<void>;
-export declare const evaluateInitEngine: (engineName: string, baseUrl: string, parallelCompilation?: boolean) => Promise<boolean | undefined>;
+export declare const evaluateInitEngine: (engineName: string, baseUrl: string, parallelCompilation?: boolean) => Promise<true | undefined>;
 export declare const evaluateEventListenerAugmentation: () => Promise<void>;
 export declare const evaluateCreateScene: () => Promise<boolean>;
 export declare const evaluateRenderScene: (renderCount?: number) => Promise<number>;
