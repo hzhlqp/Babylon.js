@@ -1,33 +1,40 @@
-const fs = require("fs");
 const path = require("path");
+
 module.exports = {
-  mode: "production",
-  entry: "./splitConfig.js", // 入口文件指向 'index.js'
+  entry: "./customBabylon.ts", // 入口文件
   output: {
-    filename: "[name].[contenthash].js", // 动态生成的模块文件
-    path: path.resolve(__dirname + "/assets/", "babylon"),
-    clean: true, // 清理旧的输出文件
-    library: "BABYLON", // UMD 格式库
-    libraryTarget: "umd",
+    path: path.resolve(__dirname, "dist"),
+    filename: "babylon.js", // 输出文件名
+    library: "BABYLON", // 导出的库名称，可以在 HTML 中直接引用
+    libraryTarget: "umd", // 生成通用模块格式（支持多种模块加载器）
   },
-  optimization: {
-    splitChunks: {
-      chunks: "all", // 分离所有模块
-      minSize: 10000, // 模块大小超过 10KB 才分离
-      maxSize: 250000, // 最大文件大小限制
+  resolve: {
+    extensions: [".ts", ".js"], // 自动解析扩展名
+    alias: {
+      "@core": path.resolve(__dirname, "packages/dev/core/src"), // 定义别名，优化路径
     },
   },
   module: {
     rules: [
       {
-        test: /\.ts$/, // 处理 TypeScript 文件
-        use: "ts-loader",
+        test: /\.ts$/, // 匹配 .ts 文件
+        use: "ts-loader", // 使用 ts-loader 转译 TypeScript
         exclude: /node_modules/,
+      },
+      {
+        test: /\.js$/, // 处理 JavaScript 文件
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"], // 支持 ES6+
+            plugins: [
+              "@babel/plugin-transform-typescript", // 支持 TS 枚举
+            ],
+          },
+        },
       },
     ],
   },
-  resolve: {
-    extensions: [".js", ".ts"], // 支持 .ts 和 .js 文件
-  },
-  devtool: "source-map", // 开启源代码映射
+  mode: "production",
 };
